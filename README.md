@@ -1,8 +1,8 @@
 # traefik-compose
 
-A very simple but working template of Traefik
+A very simple but working template of [Traefik](https://traefik.io/) reverse proxy
 
-Using Lets Encrypt with dns-01 challenge, no need to open any ports
+Using [Lets Encrypt](https://letsencrypt.org/) with [dns-01 challenge](https://doc.traefik.io/traefik/https/acme/#providers), no need to open any ports
 
 # Setup
 
