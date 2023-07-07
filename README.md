@@ -6,7 +6,9 @@ Using Lets Encrypt with dns-01 challenge, no need to open any ports
 
 # Setup
 
-Edit `required/traefik.yml` and modify the domain to use for Lets Encrypt and the domain DNS provider to use
+Edit `docker-compose.yml` and modify the dashboard domain and the token variable to fit whatever dns-01 provider to use
+
+Edit `required/traefik.yml` and modify the domain to use, and further below modify the dns-01 provider to use
 
 If you want to proxy services that are not running on the same Docker host as Traefik itself, or on completely different machines (like a VM):
 
