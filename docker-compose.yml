@@ -1,7 +1,5 @@
 version: "3"
 
-# i use a static external network: docker network create traefikproxy --attachable -d bridge --subnet 172.69.69.0/24 --gateway 172.69.69.1
-
 networks:
   traefikproxy:
     external: true
@@ -20,7 +18,7 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 9988:8080   # web UI & metrics
+      - 8080:8080   # web UI & metrics
     environment:
       - TZ=Europe/Berlin
       #- PUID=1000
@@ -39,7 +37,6 @@ services:
       - ./required/traefik.yml:/etc/traefik/traefik.yml
       - ./required/fileConfig.yml:/etc/traefik/fileConfig.yml
       - ./required/acme.json:/etc/traefik/acme.json
-      - ./required/dynamic-config.yml:/etc/traefik/dynamic-config.yml
     healthcheck:
       test: "wget --no-verbose --tries=1 --spider --no-check-certificate http://localhost:8080 || exit 1"
       interval: 30s
