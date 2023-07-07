@@ -1,0 +1,48 @@
+version: "3"
+
+# i use a static external network: docker network create traefikproxy --attachable -d bridge --subnet 172.69.69.0/24 --gateway 172.69.69.1
+
+networks:
+  traefikproxy:
+    external: true
+
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:v2.10
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`traefik.example.com`)   # Define the subdomain for the traefik dashboard.
+      - traefik.http.routers.api.service=api@internal   # Enable Traefik API.
+    networks:
+      - traefikproxy
+    ports:
+      - 80:80
+      - 443:443
+      - 9988:8080   # web UI & metrics
+    environment:
+      - TZ=Europe/Berlin
+      #- PUID=1000
+      #- PGID=1000
+      #- DESEC_TOKEN=ABCDEFG
+    command:
+      - --entryPoints.http.address=:80
+      - --providers.docker=true
+      - --providers.file.filename=/etc/traefik/dynamic-config.yml
+      #- --metrics
+      #- --metrics=true
+      #- --metrics.prometheus=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./logs:/logs
+      - ./required/traefik.yml:/etc/traefik/traefik.yml
+      - ./required/fileConfig.yml:/etc/traefik/fileConfig.yml
+      - ./required/acme.json:/etc/traefik/acme.json
+      - ./required/dynamic-config.yml:/etc/traefik/dynamic-config.yml
+    healthcheck:
+      test: "wget --no-verbose --tries=1 --spider --no-check-certificate http://localhost:8080 || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
