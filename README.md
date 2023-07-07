@@ -25,3 +25,27 @@ Every Docker service that you want to proxy needs to be a member of this network
 Create empty required file, otherwise Docker mapping fails:
 
 `touch required/acme.json`
+
+# Proxying services
+
+See folder `example-service` for a example docker-compose.yml of a service that gets proxied with this Traefik setup.
+
+The only important parts are the labels, you attach those to the container and Traefik will read them.
+
+Once Traefik is running like this, you never have to touch it again. You only modify labels on new containers to proxy.
+
+These are all that is needed:
+
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefikproxy
+      - traefik.http.routers.CHANGEME.rule=Host(`CHANGEME.example.com`)   # change name
+      - traefik.http.services.CHANGEME.loadbalancer.server.port=80        # change name AND port
+
+Simply replace CHANGEME with the name of the service and subdomain you want to use.
+
+Important: The port needs to be the INTERNAL container port of the service you are proxying, so for example just 80.
+Not 8080 if you would map it in Docker, that is only for the Docker host. Traefik talks directly to the service so
+the internal port is used for that. See the example service.
+
+# EOF
