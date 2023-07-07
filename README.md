@@ -18,8 +18,6 @@ Create Docker network:
 
 `docker network create traefikproxy --attachable -d bridge --subnet 172.69.69.0/24 --gateway 172.69.69.1`
 
-Create folder and required file:
-
-`mkdir required`
+Create empty required file:
 
 `touch required/acme.json`
