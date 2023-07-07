@@ -48,4 +48,7 @@ Important: The port needs to be the INTERNAL container port of the service you a
 Not 8080 if you would map it in Docker, that is only for the Docker host. Traefik talks directly to the service so
 the internal port is used for that. See the example service.
 
+After adding a new proxied service and starting it, give it a little bit of time. It can take almost a minute for Traefik to
+fully add the new service and actually work, dont expect it to be instant.
+
 # EOF
