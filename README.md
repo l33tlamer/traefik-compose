@@ -14,12 +14,14 @@ To proxy services that are not running on the same Docker host as Traefik itself
 
 Edit `required/fileConfig.yml` and uncomment the example of Home Assistant for both `routers` and `services` entry.
 
-# Run before starting:
+# Run before starting the first time:
 
-Create Docker network:
+Create Docker network, adjust however you want:
 
 `docker network create traefikproxy --attachable -d bridge --subnet 172.69.69.0/24 --gateway 172.69.69.1`
 
-Create empty required file:
+Every Docker service that you want to proxy needs to be a member of this network
+
+Create empty required file, otherwise Docker mapping fails:
 
 `touch required/acme.json`
