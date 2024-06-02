@@ -1,5 +1,3 @@
-version: "3"
-
 networks:
   traefikproxy:
     external: true
@@ -7,30 +5,33 @@ networks:
 services:
   traefik:
     container_name: traefik
-    image: traefik:v2.10
+    image: traefik:v3.0
     restart: unless-stopped
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.api.rule=Host(`traefik.example.com`)   # Define the subdomain for the traefik dashboard.
-      - traefik.http.routers.api.service=api@internal   # Enable Traefik API.
+      - traefik.enable=true                                         # enable traefik proxying for this container
+      - traefik.http.routers.api.rule=Host(`traefik.example.com`)   # Define host for this traefik dashboard
+      - traefik.http.routers.api.service=api@internal               # Enable Traefik API.
     networks:
       - traefikproxy
     ports:
-      - 80:80
-      - 443:443
-      - 8080:8080   # web UI & metrics
+      - 80:80       # absolutely required
+      - 443:443     # absolutely required
+      - 8080:8080   # optional, webUI & metrics
     environment:
-      - TZ=Europe/Berlin
-      #- PUID=1000
-      #- PGID=1000
-      #- DESEC_TOKEN=ABCDEFG
+      - TZ=Europe/Berlin     # timezone
+    ### run with different user/group ID
+    # - PUID=1000
+    # - PGID=1000
+    ### required for Lets Encrypt DNS challenge auth
+    # - DNS_TOKEN=ABCDEFG
     command:
       - --entryPoints.http.address=:80
       - --providers.docker=true
       - --providers.file.filename=/etc/traefik/dynamic-config.yml
-      #- --metrics
-      #- --metrics=true
-      #- --metrics.prometheus=true
+    ### enable these if you want to provide metrics on port 8080 for Prometheus
+    # - --metrics 
+    # - --metrics=true
+    # - --metrics.prometheus=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./logs:/logs
