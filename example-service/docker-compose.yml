@@ -10,7 +10,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefikproxy
-      - traefik.http.routers.homepage.rule=Host(`homepage.example.com`)
+      - traefik.http.routers.homepage.rule=Host(`homepage.example.com`)           # change this to fit your domain
       - traefik.http.services.homepage.loadbalancer.server.port=3000              # the internal port of the proxy-target
     # - traefik.http.services.homepage.loadbalancer.server.scheme=https           # only when proxy-target is HTTPS
     networks:
