@@ -1,65 +1,78 @@
-# Traefik global configuration
+### Traefik global configuration
 global:
   checkNewVersion: true
   sendAnonymousUsage: false
 
-# Enable traefik ui dashboard
+### Enable the Traefik WebUI dashboard
 api:
   dashboard: true
   insecure: true
 
-# options for prometheus metrics
-metrics:
-  prometheus:
-    addEntryPointsLabels: true
-    addRoutersLabels: true
-    addServicesLabels: true
-    buckets:
-      - 0.1
-      - 0.3
-      - 1.2
-      - 5.0
-      - 10.0
+### Only required if you want to provide metrics for Prometheus
+#metrics:
+#  prometheus:
+#    addEntryPointsLabels: true
+#    addRoutersLabels: true
+#    addServicesLabels: true
+#    buckets:
+#      - 0.1
+#      - 0.3
+#      - 1.2
+#      - 5.0
+#      - 10.0
 
-
-# Log level INFO|DEBUG|ERROR
+### LOG LEVEL
+### either INFO|DEBUG|ERROR
 log:
   level: DEBUG
 
-
-# Configuring Multiple Filters
-accessLog:
+### LOG
+log:
+  level: ERROR
   filePath: "/logs/traefik.log"
-  format: json
+  # output format can be either 'common' or 'json'
+  format: common
+  # log rotation
+  maxSize: 10
+  maxBackups: 3
+  maxAge: 7
+  # compress rotated logs with gzip
+  compress: true
+
+### ACCESS LOG
+accessLog:
+  filePath: "/logs/access.log"
+  # output format can be either 'common' or 'json'
+  format: common
   filters:
     statusCodes:
-    #  - "200" # log successful http requests
-      - "400-599" # log failed http requests
+    # - "200"           # log successful http requests
+      - "400-599"       # log failed http requests
     #retryAttempts: true
     #minDuration: "10ms"
-  # collect logs as in-memory buffer before writing into log file
-  bufferingSize: 0
+  # how many log lines to keep in memory only before writing to disk
+  bufferingSize: 50
   fields:
     headers:
-      defaultMode: drop # drop all headers per default
+      defaultMode: drop       # drop all headers per default
       names:
-          User-Agent: keep # log user agent strings
+          User-Agent: keep    # log user agent strings
 
-# The setting below is to allow insecure backend connections.  
+### Allow insecure backend connections
 serversTransport:
   insecureSkipVerify: true
 
-# Traefik entrypoints (network ports) configuration
+### Traefik entrypoints (network ports) configuration
 entryPoints:
   # Not used in apps, but redirect everything from HTTP to HTTPS
   http:
     address: :80
     forwardedHeaders:
       trustedIPs: &trustedIps
-        - 127.0.0.1/32
-        - 10.0.0.0/8
-        - 192.168.0.0/16
-        - 172.16.0.0/12
+        - 127.0.0.1/32     # localhost
+        - 10.0.0.0/8       # private class A
+        - 192.168.0.0/16   # private class B
+        - 172.16.0.0/12    # private class C
     http:
       redirections:
         entryPoint:
@@ -76,12 +89,12 @@ entryPoints:
         # Generate a wildcard domain certificate
         certResolver: letsencrypt
         domains:
-          - main: example.com # change this to your proxy domain
+          - main: example.com          # change this to fit your proxy domain
             sans:
-              - '*.example.com' # change this to your proxy domain
+              - '*.example.com'        # change this to fit your proxy domain
       middlewares:
-        - security-headers@file # reference to a dynamic middleware for setting http security headers per default
-        - rate-limit@file # reference to a dynamic middleware for enabling rate limiting per default
+        - security-headers@file        # reference to a dynamic middleware for setting http security headers per default
+        - rate-limit@file              # reference to a dynamic middleware for enabling rate limiting per default
 
 providers:
   providersThrottleDuration: 2s
@@ -94,29 +107,30 @@ providers:
   # Docker provider for connecting all apps that are inside of the docker network
   docker:
     watch: true
-    network: traefikproxy # Add Your Docker Network Name Here
+    network: traefikproxy              # Add Your Docker Network Name Here
     # Default host rule to containername.domain.example
-    defaultRule: "Host(`{{ index .Labels \"com.docker.compose.service\"}}.example.com`)" # change 'example.com' to your proxy domain
-    swarmModeRefreshSeconds: 15s
+    defaultRule: "Host(`{{ index .Labels \"com.docker.compose.service\"}}.example.com`)"      # change this to fit your proxy domain
     exposedByDefault: false
 
-# Use letsencrypt to generate ssl certificates
+### Lets Encrypt for SSL certificates
 certificatesResolvers:
   letsencrypt:
     acme:
-      # change email to fit whatever domain you want to use
+      # change email to fit you want to use, should be valid but can be fake
       email: mail@example.com
       storage: /etc/traefik/acme.json
-      #caServer: https://acme-staging-v02.api.letsencrypt.org/directory
-      caServer: https://acme-v02.api.letsencrypt.org/directory
+      # Use this entry only when setting up first time for testing
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      # Use this entry only once testing is good and comment the above
+      #caServer: https://acme-v02.api.letsencrypt.org/directory
       dnsChallenge:
-        # change the provider to fit whatever youre using for dns-01 challenge
+        # change the provider to fit whatever youre using for DNS-01 challenge
         provider: desec
-        # Used to make sure the dns challenge is propagated to the rights dns servers
+        # Used to make sure the dns challenge is propagated to the rights dns servers, probably not really required
         resolvers:
-          - "8.8.8.8:53"
-          - "8.8.4.4:53"
-          - "45.54.76.1:53"
-          - "157.53.224.1:53"
-          - "1.1.1.1:53"
-          - "1.0.0.1:53"
+          - "8.8.8.8:53"         # Google
+          - "8.8.4.4:53"         # Google
+          - "45.54.76.1:53"      # DeSEC
+          - "157.53.224.1:53"    # DeSEC
+          - "1.1.1.1:53"         # Cloudflare
+          - "1.0.0.1:53"         # Cloudflare
