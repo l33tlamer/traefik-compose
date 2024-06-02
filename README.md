@@ -10,9 +10,9 @@ It also is setup to use Docker container labels for the proxy-targets to make fu
 
 # Modify configs
 
-Edit `docker-compose.yml` and adjust (sub)domain and the token variable for your DNS-01 provider
+Edit `docker-compose.yml` and adjust (sub)domain and the token variable for your DNS-01 provider.
 
-Edit `required/traefik.yml` and adjust (sub)domain, and modify the DNS-01 provider
+Edit `required/traefik.yml` and adjust (sub)domain, and modify the DNS-01 provider.
 
 To proxy services that are not running on the same Docker host as Traefik itself, or on completely different machines:
 
@@ -22,7 +22,7 @@ Edit `required/fileConfig.yml` and see the example of Home Assistant for both `r
 
 Create a dedicated Docker network for the proxy, adjust however you want:
 
-`docker network create traefikproxy --attachable -d bridge --subnet 172.69.69.0/24 --gateway 172.69.69.1`
+`docker network create traefikproxy -d bridge --subnet 172.69.69.0/24 --gateway 172.69.69.1`
 
 If you use a different network name, then you also need to change that in `required/traefik.yml`.
 
@@ -50,14 +50,18 @@ See folder `example-service` for a docker-compose.yml of a service that gets pro
 
 The only important bits are that the container is a member of the proxy network, and has those specific labels.
 
-These are all that is needed:
+These are the required labels:
 
     labels:
       - traefik.enable=true
-      - traefik.docker.network=traefikproxy                               # name of Docker network
-      - traefik.http.routers.CHANGEME.rule=Host(`SUBDOMAIN.example.com`)  # adjust to fit your (sub)domain
-      - traefik.http.services.CHANGEME.loadbalancer.server.port=80        # adjust to fit the internal target port
-      - traefik.http.services.CHANGEME.loadbalancer.server.scheme=https   # only use when target is HTTPS
+    # name of the dedicated Docker proxy network
+      - traefik.docker.network=traefikproxy
+    # adjust to fit your (sub)domain
+      - traefik.http.routers.CHANGEME.rule=Host(`SUBDOMAIN.example.com`)
+    # adjust to fit the INTERNAL port of the proxy-target service
+      - traefik.http.services.CHANGEME.loadbalancer.server.port=80
+    # use this only if the proxy-target already provides HTTPS and not HTTP
+      - traefik.http.services.CHANGEME.loadbalancer.server.scheme=https
 
 The CHANGEME part must be unique for each service you deploy for Traefik, simply use the name of the service.
 
@@ -70,7 +74,7 @@ In the future, whenever you deploy a new service and you want to proxy it, all y
 the proxy network and copy/paste those lines for the labels. No need to touch Traefik configs or to restart Traefik.
 
 After adding a new proxied service and starting it, give it a little bit of time.
-It can take ~30sec sometimes for Traefik to recognize a fresh container and start proxying for it.
+Sometimes it can take ~30sec for Traefik to recognize a fresh container and start proxying for it.
 
 In addition to all this, you need a proper DNS setup that points your `subdomain.example.com` of a service to the
 IP of this Traefik instance, do NOT point it at the IP of the service.
