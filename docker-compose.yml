@@ -22,13 +22,15 @@ services:
     ### run with different user/group ID
     # - PUID=1000
     # - PGID=1000
-    ### required for Lets Encrypt DNS challenge auth
-    # - DNS_TOKEN=ABCDEFG
+    ### required for Lets Encrypt DNS challenge auth, in this example with www.desec.io
+      - DESEC_TOKEN=ABCDEFG
     command:
       - --entryPoints.http.address=:80
       - --providers.docker=true
       - --providers.file.filename=/etc/traefik/dynamic-config.yml
-    ### enable these if you want to provide metrics on port 8080 for Prometheus
+    ### optional, if you want log entries to be timestamped in your actual timezone instead of default UTC
+      - --accesslog.fields.names.StartUTC=drop
+    ### Only required if you want to provide metrics for Prometheus
     # - --metrics 
     # - --metrics=true
     # - --metrics.prometheus=true
