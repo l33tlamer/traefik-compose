@@ -22,7 +22,7 @@ Edit `required/fileConfig.yml` and see the example of Home Assistant for both `r
 
 Create a dedicated Docker network for the proxy, adjust however you want:
 
-`docker network create traefikproxy -d bridge --subnet 172.69.69.0/24 --gateway 172.69.69.1`
+`docker network create traefikproxy -d bridge --subnet 172.20.69.0/24 --gateway 172.20.69.1`
 
 If you use a different network name, then you also need to change that in `required/traefik.yml`.
 
